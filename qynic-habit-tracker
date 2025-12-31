@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qynic AI – 30 Day Habit Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0f1a;
+      color: #fff;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #7cf3ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #1f2a44;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #111833;
+    }
+    input[type="checkbox"] {
+      transform: scale(1.3);
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #7cf3ff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    canvas {
+      margin-top: 40px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Qynic AI – 30 Day Habit Tracker</h1>
+  <p style="text-align:center">Daily AI Shorts Publishing Tracker</p>  <table>
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>15:00</th>
+        <th>18:00</th>
+        <th>21:00</th>
+      </tr>
+    </thead>
+    <tbody id="tracker"></tbody>
+  </table><button onclick="saveData()">Save Progress</button>
+
+<canvas id="progressChart" height="120"></canvas>
+
+  <script>
+    const tracker = document.getElementById('tracker');
+    const days = 30;
+
+    function loadData() {
+      const data = JSON.parse(localStorage.getItem('qynicTracker')) || {};
+      for (let i = 1; i <= days; i++) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${i}</td>
+          <td><input type="checkbox" data-day="${i}" data-time="15" ${data[`${i}-15`] ? 'checked' : ''}></td>
+          <td><input type="checkbox" data-day="${i}" data-time="18" ${data[`${i}-18`] ? 'checked' : ''}></td>
+          <td><input type="checkbox" data-day="${i}" data-time="21" ${data[`${i}-21`] ? 'checked' : ''}></td>
+        `;
+        tracker.appendChild(row);
+      }
+      updateChart();
+    }
+
+    function saveData() {
+      const data = {};
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        const key = `${cb.dataset.day}-${cb.dataset.time}`;
+        data[key] = cb.checked;
+      });
+      localStorage.setItem('qynicTracker', JSON.stringify(data));
+      updateChart();
+      alert('Progress saved!');
+    }
+
+    function updateChart() {
+      const data = JSON.parse(localStorage.getItem('qynicTracker')) || {};
+      const dailyCounts = Array(days).fill(0);
+      Object.keys(data).forEach(key => {
+        if (data[key]) {
+          const day = parseInt(key.split('-')[0]) - 1;
+          dailyCounts[day]++;
+        }
+      });
+
+      if (window.chart) window.chart.destroy();
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      window.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: days }, (_, i) => i + 1),
+          datasets: [{
+            label: 'Shorts Published Per Day',
+            data: dailyCounts,
+            borderWidth: 2,
+            fill: false
+          }]
+        }
+      });
+    }
+
+    loadData();
+  </script></body>
+</html>
