@@ -1,1 +1,0 @@
-# Qynic AI Habit Tracker
